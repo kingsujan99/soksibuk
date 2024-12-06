@@ -1,0 +1,288 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HASIL GABUT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      audio {
+        position: absolute;
+        top: 1;
+
+        z-index: 20;
+      }
+
+      .fireworks {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+      }
+      .congrats-message {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 20;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .congrats-message h2 {
+        background: linear-gradient(90deg, #ff69b4, #ff1493, #ff69b4, #ff1493);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradient 3s infinite;
+      }
+      @keyframes gradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      .moving-background {
+        background: linear-gradient(90deg, #ff69b4, #ff1493, #ff69b4, #ff1493);
+        background-size: 200% 200%;
+        animation: moveBackground 5s linear infinite;
+      }
+      @keyframes moveBackground {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-green-200 flex items-center justify-center h-screen relative">
+    <img
+      alt="Anime GIF background with vibrant colors and dynamic scenes"
+      class="absolute inset-0 w-full h-full object-cover z-0"
+      height="1080"
+      src="https://www.icegif.com/wp-content/uploads/2023/07/icegif-86.gif"
+      width="1920"
+    />
+    <audio autoplay="" controls="" src="videoplayback (1).mp3"></audio>
+
+    >
+    <div
+      class="bg-white p-8 rounded-lg shadow-lg text-center max-w-md w-full z-10 relative"
+    >
+      <h1 class="text-3xl font-bold mb-4 text-green-700">Tebak Angka</h1>
+      <p class="mb-4 text-green-600" id="rangeMessage">
+        TEBAK ANGKA DARI 1 SAMPAI 100
+      </p>
+      <input
+        class="border p-2 mb-4 w-full rounded"
+        id="guessInput"
+        placeholder="Masukkan tebakan Anda"
+        type="number"
+      />
+      <button
+        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300"
+        onclick="checkGuess()"
+      >
+        <i class="fas fa-check"> </i>
+        Tebak
+      </button>
+      <p class="text-red-500" id="resultMessage">
+        KURANG NAIK GOBLOK! Coba lagi.
+      </p>
+      <p class="mt-2 text-sm text-gray-600" id="levelMessage">Level: 1</p>
+      <div class="mt-4">
+        <button
+          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
+          id="hintButton"
+          onclick="useHint()"
+        >
+          <i class="fas fa-lightbulb"> </i>
+          Gunakan Hint
+        </button>
+        <p class="mt-2 text-sm text-gray-600" id="hintMessage"></p>
+      </div>
+    </div>
+    <div class="absolute bottom-4 right-4 text-gray-500 text-sm z-10">
+      Sujan
+    </div>
+    <canvas class="fireworks" id="fireworksCanvas"> </canvas>
+    <div class="congrats-message moving-background" id="congratsMessage">
+      <h2 class="text-4xl font-bold mt-4">HOKI LU!</h2>
+      <p class="text-2xl">Anda menebak dengan benar!</p>
+    </div>
+    <div class="congrats-message moving-background" id="rewardMessage">
+      <h2 class="text-4xl font-bold mt-4">SELAMAT!</h2>
+      <p class="text-2xl">
+        Anda mencapai level 10! Ini hadiah Anda: 5k chat admin
+      </p>
+      <img
+        alt="A placeholder image representing a reward, such as a trophy or a gift box"
+        class="mt-4 mx-auto"
+        height="200"
+        src="https://storage.googleapis.com/a1aa/image/5JjqT7epTETKfkaNTPoG7dS3IsxvA2VF9lyTIQOtNKU9gE4TA.jpg"
+        width="300"
+      />
+    </div>
+    <script>
+      let level = 1;
+      let maxNumber = 100;
+      let randomNumber = Math.floor(Math.random() * maxNumber) + 1;
+      let hintUsed = false;
+
+      function checkGuess() {
+        const guess = document.getElementById("guessInput").value;
+        const resultMessage = document.getElementById("resultMessage");
+        const levelMessage = document.getElementById("levelMessage");
+        const rangeMessage = document.getElementById("rangeMessage");
+        const hintMessage = document.getElementById("hintMessage");
+
+        if (guess == randomNumber) {
+          resultMessage.textContent = "Selamat! Anda menebak dengan benar!";
+          resultMessage.className = "text-green-500";
+          startFireworks();
+          showCongratsMessage();
+          level++;
+          maxNumber += 100;
+          levelMessage.textContent = "Level: " + level;
+          rangeMessage.textContent = "TEBAK ANGKA DARI 1 SAMPAI " + maxNumber;
+          resetGame();
+          if (level % 10 === 0) {
+            showRewardMessage();
+          }
+        } else if (guess > randomNumber) {
+          resultMessage.textContent = "KETINGGIAN ANJ! Coba lagi.";
+          resultMessage.className = "text-red-500";
+        } else {
+          resultMessage.textContent = "KURANG NAIK GOBLOK! Coba lagi.";
+          resultMessage.className = "text-red-500";
+        }
+
+        hintMessage.textContent = "";
+      }
+
+      function resetGame() {
+        randomNumber = Math.floor(Math.random() * maxNumber) + 1;
+        document.getElementById("guessInput").value = "";
+        document.getElementById("resultMessage").textContent = "";
+        hintUsed = false;
+        document.getElementById("hintButton").disabled = false;
+      }
+
+      function startFireworks() {
+        const canvas = document.getElementById("fireworksCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const colors = [
+          "#ff0000",
+          "#00ff00",
+          "#0000ff",
+          "#ffff00",
+          "#ff00ff",
+          "#00ffff",
+        ];
+
+        function createParticle(x, y) {
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          const angle = Math.random() * 2 * Math.PI;
+          const speed = Math.random() * 5 + 2;
+          particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            color: color,
+            life: 100,
+          });
+        }
+
+        function updateParticles() {
+          for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+            if (p.life <= 0) {
+              particles.splice(i, 1);
+            }
+          }
+        }
+
+        function drawParticles() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (const p of particles) {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+        }
+
+        function loop() {
+          updateParticles();
+          drawParticles();
+          if (particles.length > 0) {
+            requestAnimationFrame(loop);
+          }
+        }
+
+        for (let i = 0; i < 200; i++) {
+          createParticle(canvas.width / 2, canvas.height / 2);
+        }
+
+        loop();
+      }
+
+      function showCongratsMessage() {
+        const congratsMessage = document.getElementById("congratsMessage");
+        congratsMessage.style.display = "block";
+        setTimeout(() => {
+          congratsMessage.style.display = "none";
+        }, 3000);
+      }
+
+      function showRewardMessage() {
+        const rewardMessage = document.getElementById("rewardMessage");
+        rewardMessage.style.display = "block";
+        setTimeout(() => {
+          rewardMessage.style.display = "none";
+        }, 5000);
+      }
+
+      function useHint() {
+        const hintMessage = document.getElementById("hintMessage");
+        if (!hintUsed) {
+          if (randomNumber % 2 === 0) {
+            hintMessage.textContent =
+              "Hint: Angka yang benar adalah genap. Ayo, kamu pasti bisa!";
+          } else {
+            hintMessage.textContent =
+              "Hint: Angka yang benar adalah ganjil. Semangat, kamu pasti bisa!";
+          }
+          hintUsed = true;
+          document.getElementById("hintButton").disabled = true;
+        } else {
+          hintMessage.textContent =
+            "Anda sudah menggunakan hint untuk level ini.";
+        }
+      }
+    </script>
+  </body>
+</html>
